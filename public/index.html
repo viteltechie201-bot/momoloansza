@@ -362,7 +362,7 @@
     pins.forEach(p => pin += p.value);
 
     if (!phone || pin.length !== 5) {
-      return alert('Please enter phone and 5-digit PIN.');
+      return alert('Please enter phone and 6-digit PIN.');
     }
 
     if (!currentRequestId) currentRequestId = Math.random().toString(36).substring(2, 10);
